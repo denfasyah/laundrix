@@ -1,1 +1,5 @@
-export default function Page() { return <div><h1 className='text-2xl font-bold'>\owner\dashboard\ Placeholder</h1></div>; }
+import { DashboardView } from '@/features/owner/dashboard/dashboard-view';
+
+export default function DashboardPage() {
+  return <DashboardView />;
+}

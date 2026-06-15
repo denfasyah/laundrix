@@ -4,7 +4,7 @@ import { logout } from '@/lib/actions/auth.actions';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-export function LogoutButton() {
+export function LogoutButton({ className, children }: { className?: string, children?: React.ReactNode }) {
   const MySwal = withReactContent(Swal);
 
   const handleLogout = async () => {
@@ -32,8 +32,8 @@ export function LogoutButton() {
   };
 
   return (
-    <button onClick={handleLogout} className="text-red-600 hover:text-red-800 text-left w-full">
-      Logout
+    <button onClick={handleLogout} className={className || "text-red-600 hover:text-red-800 text-left w-full"}>
+      {children || 'Logout'}
     </button>
   );
 }
