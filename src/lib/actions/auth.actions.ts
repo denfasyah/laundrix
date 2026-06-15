@@ -3,19 +3,35 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
-export async function login(formData: FormData) {
-  const username = formData.get('username');
-  const password = formData.get('password');
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
-  if (username === 'owner' && password === 'owner123') {
-    (await cookies()).set('session', 'owner', { path: '/', httpOnly: true });
-    redirect('/owner/dashboard');
-  } else if (username === 'staff' && password === 'staff123') {
-    (await cookies()).set('session', 'staff', { path: '/', httpOnly: true });
-    redirect('/staff/dashboard');
-  } else {
+export async function login(formData: FormData) {
+  const email = formData.get('username') as string;
+  const password = formData.get('password') as string;
+
+  if (!email || !password) {
+    return { error: 'Email and password are required' };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user || !user.is_active) {
+    return { error: 'Invalid credentials or inactive account' };
+  }
+
+  const passwordMatch = await bcrypt.compare(password, user.password_hash);
+  
+  if (!passwordMatch) {
     return { error: 'Invalid credentials' };
   }
+
+  const roleValue = user.role.toLowerCase();
+  (await cookies()).set('session', roleValue, { path: '/', httpOnly: true });
+
+  redirect(`/${roleValue}/dashboard`);
 }
 
 export async function logout() {

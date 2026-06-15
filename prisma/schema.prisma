@@ -7,3 +7,259 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+enum UserRole {
+  OWNER
+  STAFF
+
+  @@map("user_role")
+}
+
+enum MachineType {
+  WASHER
+  DRYER
+
+  @@map("machine_type")
+}
+
+enum ServiceType {
+  CA
+  CK
+  KA
+
+  @@map("service_type")
+}
+
+enum TransactionItemType {
+  SERVICE
+  RETAIL
+
+  @@map("transaction_item_type")
+}
+
+enum MachineReportStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+
+  @@map("machine_report_status")
+}
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(255)
+  password_hash String   @db.Text
+  role          UserRole
+  branch_id     String?  @db.Uuid
+  is_active     Boolean  @default(true)
+  created_by    String?  @db.Uuid
+  created_at    DateTime @default(now()) @db.Timestamptz
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  // Relations
+  branch                 Branch?               @relation("StaffBranch", fields: [branch_id], references: [id], onDelete: Restrict)
+  
+  created_branches       Branch[]              @relation("BranchCreator")
+  created_machines       Machine[]             @relation("MachineCreator")
+  created_service_prices ServicePrice[]        @relation("ServicePriceCreator")
+  created_inventory      InventoryItem[]       @relation("InventoryItemCreator")
+  created_restocks       InventoryRestockLog[] @relation("RestockCreator")
+  created_transactions   Transaction[]         @relation("TransactionCreator")
+  
+  attendances            Attendance[]          @relation("StaffAttendance")
+  machine_reports        MachineReport[]       @relation("ReportCreator")
+
+  @@index([branch_id])
+  @@index([role])
+  @@map("users")
+}
+
+model Branch {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @db.VarChar(100)
+  address    String?  @db.Text
+  is_active  Boolean  @default(true)
+  created_by String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  creator      User                  @relation("BranchCreator", fields: [created_by], references: [id], onDelete: Restrict)
+  
+  staff        User[]                @relation("StaffBranch")
+  machines     Machine[]             @relation("BranchMachines")
+  stocks       InventoryStock[]      @relation("BranchStock")
+  restock_logs InventoryRestockLog[] @relation("BranchRestocks")
+  transactions Transaction[]         @relation("BranchTransactions")
+  attendances  Attendance[]          @relation("BranchAttendances")
+  reports      MachineReport[]       @relation("BranchReports")
+
+  @@map("branches")
+}
+
+model Machine {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch_id  String      @db.Uuid
+  name       String      @db.VarChar(100)
+  type       MachineType
+  is_active  Boolean     @default(true)
+  created_by String      @db.Uuid
+  created_at DateTime    @default(now()) @db.Timestamptz
+  updated_at DateTime    @default(now()) @updatedAt @db.Timestamptz
+
+  branch  Branch          @relation("BranchMachines", fields: [branch_id], references: [id], onDelete: Restrict)
+  creator User            @relation("MachineCreator", fields: [created_by], references: [id], onDelete: Restrict)
+  reports MachineReport[] @relation("MachineReports")
+
+  @@index([branch_id])
+  @@map("machines")
+}
+
+model ServicePrice {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  service_type ServiceType @unique
+  price        Decimal     @db.Decimal(10, 2)
+  created_by   String      @db.Uuid
+  created_at   DateTime    @default(now()) @db.Timestamptz
+  updated_at   DateTime    @default(now()) @updatedAt @db.Timestamptz
+
+  creator User @relation("ServicePriceCreator", fields: [created_by], references: [id], onDelete: Restrict)
+
+  @@map("service_prices")
+}
+
+model InventoryItem {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @unique @db.VarChar(100)
+  unit       String   @db.VarChar(50)
+  unit_price Decimal  @db.Decimal(10, 2)
+  is_active  Boolean  @default(true)
+  created_by String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  creator           User                  @relation("InventoryItemCreator", fields: [created_by], references: [id], onDelete: Restrict)
+  stocks            InventoryStock[]      @relation("ItemStocks")
+  restock_logs      InventoryRestockLog[] @relation("ItemRestocks")
+  transaction_items TransactionItem[]     @relation("ItemTransactionItems")
+
+  @@map("inventory_items")
+}
+
+model InventoryStock {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch_id           String   @db.Uuid
+  inventory_item_id   String   @db.Uuid
+  current_stock       Int      @default(0)
+  low_stock_threshold Int      @default(5)
+  updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  branch Branch        @relation("BranchStock", fields: [branch_id], references: [id], onDelete: Restrict)
+  item   InventoryItem @relation("ItemStocks", fields: [inventory_item_id], references: [id], onDelete: Restrict)
+
+  @@unique([branch_id, inventory_item_id], map: "uq_stock_branch_item")
+  @@index([branch_id])
+  @@map("inventory_stock")
+}
+
+model InventoryRestockLog {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch_id         String   @db.Uuid
+  inventory_item_id String   @db.Uuid
+  quantity_added    Int
+  notes             String?  @db.Text
+  created_by        String   @db.Uuid
+  created_at        DateTime @default(now()) @db.Timestamptz
+  updated_at        DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  branch  Branch        @relation("BranchRestocks", fields: [branch_id], references: [id], onDelete: Restrict)
+  item    InventoryItem @relation("ItemRestocks", fields: [inventory_item_id], references: [id], onDelete: Restrict)
+  creator User          @relation("RestockCreator", fields: [created_by], references: [id], onDelete: Restrict)
+
+  @@index([branch_id])
+  @@map("inventory_restock_logs")
+}
+
+model Transaction {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch_id        String   @db.Uuid
+  total_amount     Decimal  @default(0) @db.Decimal(10, 2)
+  notes            String?  @db.Text
+  transaction_date DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+  created_by       String    @db.Uuid
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz
+  deleted_at       DateTime? @db.Timestamptz
+  deleted_by       String?   @db.Uuid
+
+  branch  Branch            @relation("BranchTransactions", fields: [branch_id], references: [id], onDelete: Restrict)
+  creator User              @relation("TransactionCreator", fields: [created_by], references: [id], onDelete: Restrict)
+  items   TransactionItem[] @relation("TransactionItems")
+
+  @@index([branch_id])
+  @@index([created_by])
+  @@index([transaction_date])
+  @@index([branch_id, transaction_date])
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  transaction_id    String              @db.Uuid
+  item_type         TransactionItemType
+  service_type      ServiceType?
+  inventory_item_id String?             @db.Uuid
+  quantity          Int                 @default(1)
+  unit_price        Decimal             @db.Decimal(10, 2)
+  subtotal          Decimal             @db.Decimal(10, 2)
+  created_at        DateTime            @default(now()) @db.Timestamptz
+  updated_at        DateTime            @default(now()) @updatedAt @db.Timestamptz
+
+  transaction    Transaction    @relation("TransactionItems", fields: [transaction_id], references: [id], onDelete: Cascade)
+  inventory_item InventoryItem? @relation("ItemTransactionItems", fields: [inventory_item_id], references: [id], onDelete: Restrict)
+
+  @@index([transaction_id])
+  @@index([inventory_item_id])
+  @@map("transaction_items")
+}
+
+model Attendance {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  staff_id       String    @db.Uuid
+  branch_id      String    @db.Uuid
+  date           DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  check_in_time  DateTime  @db.Timestamptz
+  check_out_time DateTime? @db.Timestamptz
+  created_at     DateTime  @default(now()) @db.Timestamptz
+  updated_at     DateTime  @default(now()) @updatedAt @db.Timestamptz
+
+  staff  User   @relation("StaffAttendance", fields: [staff_id], references: [id], onDelete: Restrict)
+  branch Branch @relation("BranchAttendances", fields: [branch_id], references: [id], onDelete: Restrict)
+
+  @@unique([staff_id, date], map: "uq_attendance_staff_date")
+  @@index([staff_id])
+  @@index([branch_id])
+  @@index([date])
+  @@map("attendance")
+}
+
+model MachineReport {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  machine_id  String   @db.Uuid
+  branch_id   String   @db.Uuid
+  description String              @db.Text
+  photo_url   String?             @db.Text
+  status      MachineReportStatus @default(OPEN)
+  created_by  String              @db.Uuid
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  machine Machine @relation("MachineReports", fields: [machine_id], references: [id], onDelete: Restrict)
+  branch  Branch  @relation("BranchReports", fields: [branch_id], references: [id], onDelete: Restrict)
+  creator User    @relation("ReportCreator", fields: [created_by], references: [id], onDelete: Restrict)
+
+  @@index([branch_id])
+  @@index([created_by])
+  @@index([machine_id])
+  @@map("machine_reports")
+}
