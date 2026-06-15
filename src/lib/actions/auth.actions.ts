@@ -11,7 +11,7 @@ export async function login(formData: FormData) {
   const password = formData.get('password') as string;
 
   if (!email || !password) {
-    return { error: 'Email and password are required' };
+    return { success: false, message: 'Email atau password salah' };
   }
 
   const user = await prisma.user.findUnique({
@@ -19,19 +19,19 @@ export async function login(formData: FormData) {
   });
 
   if (!user || !user.is_active) {
-    return { error: 'Invalid credentials or inactive account' };
+    return { success: false, message: 'Email atau password salah' };
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password_hash);
   
   if (!passwordMatch) {
-    return { error: 'Invalid credentials' };
+    return { success: false, message: 'Email atau password salah' };
   }
 
   const roleValue = user.role.toLowerCase();
   (await cookies()).set('session', roleValue, { path: '/', httpOnly: true });
 
-  redirect(`/${roleValue}/dashboard`);
+  return { success: true, role: roleValue as 'owner' | 'staff' };
 }
 
 export async function logout() {

@@ -3,9 +3,13 @@
 import { login } from '@/lib/actions/auth.actions';
 import { Lock, Eye, EyeOff, LogOut, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 export function LoginForm() {
+  const router = useRouter();
+  const MySwal = withReactContent(Swal);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -37,9 +41,43 @@ export function LoginForm() {
         </header>
 
         <form 
-          action={(formData) => {
+          action={async (formData) => {
+            const email = formData.get('username') as string;
+            const password = formData.get('password') as string;
+
+            if (!email || !password) {
+              MySwal.fire({
+                icon: 'warning',
+                title: 'Validasi Gagal',
+                text: 'Email dan password wajib diisi!',
+                confirmButtonColor: '#00687b',
+              });
+              return;
+            }
+
             setIsLoading(true);
-            login(formData).finally(() => setIsLoading(false));
+            try {
+              const res = await login(formData);
+              if (res.success) {
+                await MySwal.fire({
+                  icon: 'success',
+                  title: 'Login Berhasil',
+                  text: 'Mengarahkan ke dashboard...',
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                router.push(`/${res.role}/dashboard`);
+              } else {
+                MySwal.fire({
+                  icon: 'error',
+                  title: 'Login Gagal',
+                  text: res.message || 'Email atau password salah',
+                  confirmButtonColor: '#00687b',
+                });
+              }
+            } finally {
+              setIsLoading(false);
+            }
           }} 
           className="space-y-4 sm:space-y-5"
         >
@@ -120,7 +158,7 @@ export function LoginForm() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Authenticating...
+                Signing In...
               </span>
             ) : (
               <>

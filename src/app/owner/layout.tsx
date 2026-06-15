@@ -1,4 +1,4 @@
-import { logout } from '@/lib/actions/auth.actions';
+import { LogoutButton } from '@/components/auth/logout-button';
 import Link from 'next/link';
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
@@ -16,9 +16,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
           <Link href="/owner/machine-reports" className="hover:text-blue-600">Laporan Mesin</Link>
           <Link href="/owner/reports" className="hover:text-blue-600">Laporan</Link>
           <hr className="my-4" />
-          <form action={logout}>
-            <button type="submit" className="text-red-600 hover:text-red-800 text-left">Logout</button>
-          </form>
+          <LogoutButton />
         </nav>
       </aside>
       <main className="flex-1 p-8">
