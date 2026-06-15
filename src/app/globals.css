@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --color-secondary: #805600;
+  --color-on-primary-fixed-variant: #004e5d;
+  --color-border-default: #E5E5E5;
+  --color-on-primary-container: #00323c;
+  --color-on-tertiary-fixed: #2d1600;
+  --color-on-secondary-fixed-variant: #614000;
+  --color-on-secondary-container: #694600;
+  --color-on-tertiary: #ffffff;
+  --color-success: #16A34A;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #1b1c1c;
+  --color-background: #fbf9f9;
+  --color-on-error: #ffffff;
+  --color-tertiary-container: #cd843a;
+  --color-surface-card: #FFFFFF;
+  --color-surface-variant: #e3e2e2;
+  --color-outline: #6e797d;
+  --color-primary-fixed-dim: #6dd4ef;
+  --color-tertiary-fixed-dim: #ffb875;
+  --color-secondary-container: #fdaf06;
+  --color-teal-50: #EBF8FC;
+  --color-secondary-fixed-dim: #ffba42;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-surface-variant: #3e484c;
+  --color-inverse-primary: #6dd4ef;
+  --color-secondary-fixed: #ffddaf;
+  --color-tertiary: #8c4f03;
+  --color-primary-fixed: #aeecff;
+  --color-error: #DC2626;
+  --color-outline-variant: #bdc8cd;
+  --color-tertiary-fixed: #ffdcc0;
+  --color-surface-tint: #00687b;
+  --color-inverse-surface: #303031;
+  --color-surface-dim: #dbdad9;
+  --color-surface-container-highest: #e3e2e2;
+  --color-surface-container: #efeded;
+  --color-error-container: #ffdad6;
+  --color-surface-bg: #FAFAFA;
+  --color-on-error-container: #93000a;
+  --color-on-background: #1b1c1c;
+  --color-on-tertiary-fixed-variant: #6b3b00;
+  --color-on-primary-fixed: #001f26;
+  --color-primary-container: #2fa1bb;
+  --color-on-secondary: #ffffff;
+  --color-primary: #00687b;
+  --color-inverse-on-surface: #f2f0f0;
+  --color-on-tertiary-container: #472500;
+  --color-teal-900: #0C3A47;
+  --color-surface-container-high: #e9e8e7;
+  --color-on-secondary-fixed: #281800;
+  --color-surface-container-low: #f5f3f3;
+  --color-surface: #fbf9f9;
+  --color-surface-bright: #fbf9f9;
+
+  --spacing-md: 16px;
+  --spacing-gutter: 24px;
+  --spacing-margin-desktop: 64px;
+  --spacing-margin-mobile: 16px;
+  --spacing-3xl: 64px;
+  --spacing-sm: 8px;
+  --spacing-2xl: 48px;
+  --spacing-xs: 4px;
+  --spacing-lg: 24px;
+  --spacing-unit: 4px;
+  --spacing-xl: 32px;
+
+  --font-body-sm: "Inter", sans-serif;
+  --font-display-md: "Inter", sans-serif;
+  --font-data-metric: "JetBrains Mono", monospace;
+  --font-label-sm: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-headline-lg: "Inter", sans-serif;
+  --font-display-lg: "Inter", sans-serif;
+  --font-headline-lg-mobile: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-caption: "Inter", sans-serif;
+}
+
+body {
+  font-family: var(--font-body-sm);
+  margin: 0;
+  overflow: hidden;
+  /* Use a fallback gradient color so it's never black before shader loads */
+  background: linear-gradient(to bottom, #72c3d5, #e0f2f7);
+  color: var(--color-on-surface);
+}
+
+.refined-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
