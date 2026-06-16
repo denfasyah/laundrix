@@ -172,7 +172,7 @@ export function LoginForm() {
         {/* Footer */}
         <footer className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/40 text-center">
           <p className="text-[12px] sm:text-[13px] leading-tight text-[#3e484c]">
-            Don't have an account? <a href="#" className="text-[#00687b] font-semibold hover:underline">Contact Support</a>
+            Don&apos;t have an account? <a href="#" className="text-[#00687b] font-semibold hover:underline">Contact Support</a>
           </p>
         </footer>
       </div>

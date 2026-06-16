@@ -86,7 +86,7 @@ export function ShaderBackground() {
       }
 
       gl!.uniform1f(timeLocation, time);
-      gl!.uniform2f(resolutionLocation, canvas.width, canvas.height);
+      gl!.uniform2f(resolutionLocation, canvas!.width, canvas!.height);
       gl!.drawArrays(gl!.TRIANGLES, 0, 6);
       animationFrameId = requestAnimationFrame(render);
     }

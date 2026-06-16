@@ -20,7 +20,7 @@ export function StaffDashboardHeader() {
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
       <div>
-        <h2 className="text-[30px] font-bold text-[#1b1c1c] tracking-tight leading-tight mb-1">Dashboard</h2>
+        <h2 className="text-[30px] font-bold text-[#00687b] tracking-tight leading-tight mb-1">Dashboard</h2>
         <p className="text-[#3e484c] text-[15px]">Selamat datang kembali, Budi. Pantau tugas harian Anda di sini.</p>
       </div>
       <div className="text-right shrink-0">

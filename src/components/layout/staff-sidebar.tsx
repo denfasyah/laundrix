@@ -17,7 +17,7 @@ import {
 import { LogoutButton } from '@/components/auth/logout-button';
 
 const navItems = [
-  { name: 'Dasbor', href: '/staff/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/staff/dashboard', icon: LayoutDashboard },
   { name: 'Transaksi Baru', href: '/staff/transactions/new', icon: PlusSquare },
   { name: 'Transaksi Saya', href: '/staff/transactions', icon: ReceiptText },
   { name: 'Inventaris', href: '/staff/inventory', icon: Package },
